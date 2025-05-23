@@ -1,0 +1,60 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Typescript
+*.tsbuildinfo
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js
+.next/
+out/
+
+# Build output
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Optional: local server uploads (if you later add file uploads to backend)
+uploads/
+
+# Coverage reports (if you use testing)
+coverage/
+
+# Turbo Repo stuff (optional)
+turbo/
+
+# Backup files
+*.bak
+*.tmp
+*.swp
+*.swo
+*.swn
+
+# IDE junk
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# Local docker files (optional if you dockerize)
+docker-compose.override.yml

@@ -1,0 +1,21 @@
+{
+  "name": "how-much",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run client\" \"npm run server\"",
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run dev",
+    "clientbuild": "cd client && npm run build",
+    "serverbuild": "cd server && npm run build",
+    "clientinstall": "cd client && npm install",
+    "serverinstall": "cd server && npm install",
+    "prep": "npm run clientinstall && npm run serverinstall"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,147 @@
+.time-display {
+  position: relative;
+  display: inline-block;
+  transition: opacity 0.3s, transform 0.5s;
+}
+
+.time-display.animate {
+  animation: fadeUpIn 0.9s ease-out;
+}
+
+@keyframes fadeUpIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.time-container {
+  display: flex;
+  font-family: monospace;
+  font-size: 10rem;
+  line-height: 1;
+  height: 12rem;
+  align-items: center;
+}
+
+.digit {
+  position: relative;
+  width: 1.2em;
+  text-align: center;
+  display: inline-block;
+  overflow: visible;
+  height: 1.2em;
+}
+
+.digit-new,
+.digit-old {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  line-height: 1;
+}
+
+.digit-static {
+  position: relative;
+}
+
+.digit.changed .digit-old {
+  animation: slideUp 0.5s forwards;
+}
+
+.digit.changed .digit-new {
+  animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* For the previous digit that's about to disappear */
+.time-container .digit.animate::before {
+  content: attr(data-prev);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: digitExit 0.4s ease-out;
+  opacity: 0;
+}
+
+.money-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.inputs {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.input-group input {
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.money-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.currency {
+  font-size: 10rem;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+.status {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2ecc71;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  background-color: rgba(46, 204, 113, 0.1);
+} 
