@@ -1,5 +1,5 @@
 body {
-  margin: 0;
+  margin-top: 100px;
   padding: 0;
   height: 100vh;
   overflow: hidden;
@@ -211,4 +211,104 @@ body {
 .time-counter .digit.colon .digit-old,
 .time-counter .digit.colon .digit-new {
   animation: none !important;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+    .money-counter {
+        padding: 1rem;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .inputs {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    .input-group input {
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .money-display {
+        margin: 1rem 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .money-display h1 {
+        font-size: 5rem;
+        height: auto;
+        line-height: 1.2;
+    }
+
+    .currency {
+        font-size: 4rem;
+    }
+
+    .digit {
+        width: 2rem;
+        height: 3rem;
+        margin: 0 0.4rem;
+    }
+
+    .time-counter {
+        margin: 1rem 0;
+    }
+
+    .time-display {
+        font-size: 2rem;
+    }
+
+    .status {
+        font-size: 0.9rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        margin: 0.5rem 0;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+/* Small Mobile Devices */
+@media screen and (max-width: 480px) {
+    .money-display h1 {
+        font-size: 4.5rem;
+    }
+
+    .currency {
+        font-size: 3.5rem;
+    }
+
+    .digit {
+        width: 1.8rem;
+        height: 2.8rem;
+        margin: 0 0.35rem;
+    }
+
+    .time-display {
+        font-size: 1.8rem;
+    }
+
+    .input-group label {
+        font-size: 0.9rem;
+    }
+
+    .input-group input {
+        font-size: 0.9rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
 } 
