@@ -1,3 +1,10 @@
+body {
+  margin-top: 100px;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .time-display {
   position: relative;
   display: inline-block;
@@ -30,7 +37,7 @@
 
 .digit {
   position: relative;
-  width: 1.2em;
+  width: 0.8em;
   text-align: center;
   display: inline-block;
   overflow: visible;
@@ -96,39 +103,42 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  padding: 2rem;
+  gap: 0.5rem;
+  padding: 1rem;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .inputs {
   display: flex;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1rem;
+  margin-bottom: 0.2rem;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
 }
 
 .input-group label {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: bold;
 }
 
 .input-group input {
-  padding: 0.5rem;
-  font-size: 1.2rem;
-  border: 2px solid #ccc;
+  padding: 0.3rem;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  width: 200px;
+  width: 150px;
 }
 
 .money-display {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  margin-top: -1rem;
 }
 
 .currency {
@@ -138,10 +148,11 @@
 }
 
 .status {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #2ecc71;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
   background-color: rgba(46, 204, 113, 0.1);
+  margin-top: 0.5rem;
 } 
