@@ -1,5 +1,5 @@
 body {
-  margin-top: 100px;
+  margin: 0;
   padding: 0;
   height: 100vh;
   overflow: hidden;
@@ -155,4 +155,60 @@ body {
   border-radius: 4px;
   background-color: rgba(46, 204, 113, 0.1);
   margin-top: 0.5rem;
+}
+
+.time-counter {
+  margin: 0.5rem 0;
+}
+
+.time-counter .time-display {
+  display: flex;
+  font-family: monospace;
+  font-size: 2rem;
+  line-height: 1;
+  height: 2.5rem;
+  align-items: center;
+  color: #333;
+}
+
+.time-counter .digit {
+  position: relative;
+  width: 0.8em;
+  text-align: center;
+  display: inline-block;
+  overflow: visible;
+  height: 1.2em;
+}
+
+.time-counter .digit-new,
+.time-counter .digit-old {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  line-height: 1;
+}
+
+.time-counter .digit-static {
+  position: relative;
+}
+
+.time-counter .digit.changed .digit-old {
+  animation: slideUp 0.5s forwards;
+}
+
+.time-counter .digit.changed .digit-new {
+  animation: slideIn 0.5s forwards;
+}
+
+.time-counter .digit.colon {
+  width: 0.4em;
+  color: #666;
+  animation: none !important;
+}
+
+.time-counter .digit.colon .digit-static,
+.time-counter .digit.colon .digit-old,
+.time-counter .digit.colon .digit-new {
+  animation: none !important;
 } 
