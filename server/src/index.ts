@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db";
-import ProductPS3Routes from "./routes/productPS3.route";
+import UsersRoutes from "./routes/users.route";
 
 // configures dotenv to work in your application
 dotenv.config();
@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
   res.status(200).send("Hello World");
 }); 
 
-app.use("/api/productsPS3", ProductPS3Routes);
+app.use("/api/users", UsersRoutes);
 
 app.listen(PORT, () => { 
   connectDB();
