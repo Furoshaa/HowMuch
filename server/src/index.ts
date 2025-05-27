@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { connectDB } from "./config/db";
+import { testConnection } from "./config/db";
 import UsersRoutes from "./routes/users.route";
 
 // configures dotenv to work in your application
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", UsersRoutes);
 
 app.listen(PORT, () => { 
-  connectDB();
+  testConnection();
   console.log("Server running at PORT: ", PORT); 
 }).on("error", (error) => {
   // gracefully handle error

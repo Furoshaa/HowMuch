@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import { connectDB } from "../config/db";
+import { db } from "../config/db";
 import { User } from "../models/users.model";
 
 // Get all users
 export const getUsers = async (req: Request, res: Response) => {
     try {
-        const db = await connectDB();
         const [rows] = await db.execute<User[]>("SELECT * FROM users");
         res.status(200).json({ success: true, data: rows });
     } catch (error) {
@@ -21,7 +20,6 @@ export const getUserById = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
-        const db = await connectDB();
         const [user] = await db.execute<User[]>(
             "SELECT * FROM users WHERE id = ?",
             [id]
@@ -45,7 +43,6 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     const { username } = req.params;
 
     try {
-        const db = await connectDB();
         const [user] = await db.execute<User[]>(
             "SELECT * FROM users WHERE username = ?",
             [username]
@@ -72,7 +69,6 @@ export const createUser = async (req: Request, res: Response) => {
         res.status(400).json({ success: false, message: "Please fill all fields" });
     } else {
         try {
-            const db = await connectDB();
             const [result] = await db.execute(
                 "INSERT INTO users (username, firstname, lastname, email, password) VALUES (?, ?, ?, ?, ?)",
                 [user.username, user.firstname, user.lastname, user.email, user.password]
