@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { testConnection } from "./config/db";
 import UsersRoutes from "./routes/users.route";
+import WorkScheduleRoutes from "./routes/work_schedule.route";
 
 // configures dotenv to work in your application
 dotenv.config();
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 }); 
 
 app.use("/api/users", UsersRoutes);
+app.use("/api/schedules", WorkScheduleRoutes);
 
 app.listen(PORT, () => { 
   testConnection();

@@ -1,34 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Routes, Route, Link } from 'react-router-dom'
 import './App.css'
+import UsersList from './pages/users/usersList'
+import SchedulesList from './pages/schedules/schedulesList'
+import Register from './pages/users/Register'
+import Login from './pages/users/login'
+import NavBar from './component/NavBar'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app-container">
+      <NavBar />
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/users" element={<UsersList />} />
+          <Route path="/schedules" element={<SchedulesList />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+    </div>
+  )
+}
+
+// Simple Home component
+function Home() {
+  return (
+    <div className="home">
+      <h1>Welcome to HowMuch</h1>
+      <p>Manage your work schedules and users</p>
+      <div className="home-links">
+        <Link to="/users" className="home-link">View Users</Link>
+        <Link to="/schedules" className="home-link">View Schedules</Link>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
