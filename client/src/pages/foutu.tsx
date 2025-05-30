@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-
-import './home.css';
+import './foutu.css'
 
 const TimeCounter = () => {
     const [time, setTime] = useState(new Date());
@@ -263,7 +262,7 @@ const MoneyCounter = () => {
 const Home = () => {
     return (
         <div>
-            <h1>Money Counter</h1>
+            <h1>How Much ?</h1>
             <MoneyCounter />
         </div>
     );

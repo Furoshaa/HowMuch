@@ -1,4 +1,3 @@
-import { Pool } from 'mysql2/promise';
 import { RowDataPacket } from 'mysql2';
 
 export interface User extends RowDataPacket {
