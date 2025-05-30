@@ -5,6 +5,7 @@ import SchedulesList from './pages/schedules/schedulesList'
 import Register from './pages/users/Register'
 import Login from './pages/users/login'
 import NavBar from './component/NavBar'
+import Test from './pages/test'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/schedules" element={<SchedulesList />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/test" element={<Test />} />
         </Routes>
       </div>
     </div>
@@ -29,6 +31,7 @@ function Home() {
     <div className="home">
       <h1>Welcome to HowMuch</h1>
       <p>Manage your work schedules and users</p>
+      <p>i love you heeeeheeee</p>
       <div className="home-links">
         <Link to="/users" className="home-link">View Users</Link>
         <Link to="/schedules" className="home-link">View Schedules</Link>

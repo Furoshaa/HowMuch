@@ -3,7 +3,7 @@ export interface work_exceptions extends RowDataPacket {
     id: number;
     user_id: number; // Foreign key to users table
     date: Date; // Date of the exception
-    type: 'vacation' | 'sick' | 'custom_hours' | 'off'; // Type of exception
+    reason: 'vacation' | 'sick' | 'late' | 'early_out' | 'other' | 'overtime'; // Type of exception
     start_time?: string; // Optional start time for custom hours
     end_time?: string; // Optional end time for custom hours
     break_start?: string; // Optional break start time
@@ -14,17 +14,17 @@ export interface work_exceptions extends RowDataPacket {
 
 // SQL to create the table 
 /*
-CREATE TABLE work_exceptions (
+CREATE OR REPLACE TABLE work_exceptions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   date DATE NOT NULL,
-  type ENUM('vacation', 'sick', 'custom_hours', 'off') NOT NULL,
+  reason ENUM('vacation', 'sick', 'late', 'early_out', 'other', 'overtime') NOT NULL,
   start_time TIME,
   end_time TIME,
   break_start TIME,
   break_end TIME,
   hourly_rate DECIMAL(10, 2),
-  comment TEXT,
+  comment VARCHAR(255),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE (user_id, date)
 );
