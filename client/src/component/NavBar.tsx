@@ -28,6 +28,12 @@ function NavBar() {
                 >
                     Schedules
                 </Link>
+                <Link 
+                    to="/test" 
+                    className={location.pathname === '/test' ? 'active' : ''}
+                >
+                    Test
+                </Link>
             </div>
             <div className="navbar-auth">
                 <Link 

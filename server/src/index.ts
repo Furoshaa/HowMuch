@@ -4,6 +4,7 @@ import cors from "cors";
 import { testConnection } from "./config/db";
 import UsersRoutes from "./routes/users.route";
 import WorkScheduleRoutes from "./routes/work_schedule.route";
+import WorkExceptionRoutes from "./routes/work_exception.route";
 
 // configures dotenv to work in your application
 dotenv.config();
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/users", UsersRoutes);
 app.use("/api/schedules", WorkScheduleRoutes);
+app.use("/api/exceptions", WorkExceptionRoutes);
 
 app.listen(PORT, () => { 
   testConnection();
