@@ -31,7 +31,6 @@ function Home() {
     <div className="home">
       <h1>Welcome to HowMuch</h1>
       <p>Manage your work schedules and users</p>
-      <p>heeeheeee</p>
       <div className="home-links">
         <Link to="/users" className="home-link">View Users</Link>
         <Link to="/schedules" className="home-link">View Schedules</Link>
