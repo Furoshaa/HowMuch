@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { db } from "../config/db";
 import { User } from "../models/users.model";
 
@@ -69,9 +70,13 @@ export const createUser = async (req: Request, res: Response) => {
         res.status(400).json({ success: false, message: "Please fill all fields" });
     } else {
         try {
+            // Hash the password before storing
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+            
             const [result] = await db.execute(
                 "INSERT INTO users (username, firstname, lastname, email, password) VALUES (?, ?, ?, ?, ?)",
-                [user.username, user.firstname, user.lastname, user.email, user.password]
+                [user.username, user.firstname, user.lastname, user.email, hashedPassword]
             );
 
             const [newUser] = await db.execute<User[]>(
@@ -79,12 +84,19 @@ export const createUser = async (req: Request, res: Response) => {
                 [(result as any).insertId]
             );
 
-            res.status(201).json({ success: true, data: newUser[0] });
-        } catch (error) {
-            if (error instanceof Error) {
-                console.log("Error in creating user:", error.message);
-            }
-            res.status(500).json({ success: false, message: "server error" });
+            // Don't return the password in the response
+            const { password, ...userWithoutPassword } = newUser[0];
+            res.status(201).json({ success: true, data: userWithoutPassword });
+        } catch (error: any) {
+            console.log("Error in creating user:", error.message);
+            
+            const errorCode = error.code;
+            const statusCode = errorCode === 'ER_DUP_ENTRY' ? 409 : 500;
+            
+            res.status(statusCode).json({ 
+                success: false, 
+                message: error.message
+            });
         }
     }
 }

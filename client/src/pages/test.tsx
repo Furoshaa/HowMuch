@@ -1,4 +1,4 @@
-import TimeCircle from "../component/TimeCircle";
+import TimeCircle from "../components/TimeCircle";
 
 function Test() {
     return (
