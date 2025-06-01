@@ -37,14 +37,13 @@ function NavBar() {
         });
         navigate('/');
     };
-    
-    return (
+      return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 max-w-screen-2xl items-center">
+            <div className="flex h-14 w-full items-center px-6">
                 {/* Brand */}
                 <div className="mr-6 flex items-center space-x-2">
                     <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-xl font-bold bg-clip-text pl-5">
+                        <span className="text-xl font-bold bg-clip-text">
                             HowMuch
                         </span>
                     </Link>
@@ -73,12 +72,14 @@ function NavBar() {
                                     Dashboard
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                                    <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">                                        
                                         <li className="row-span-3">
                                             <NavigationMenuLink asChild>
                                                 <Link
-                                                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                                                     to="/dashboard"
+                                                    className={cn("flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md",
+                                                    location.pathname === '/dashboard' && "bg-accent text-accent-foreground"
+                                                    )}
                                                 >
                                                     <div className="mb-2 mt-4 text-lg font-medium">
                                                         HowMuch
@@ -88,19 +89,18 @@ function NavBar() {
                                                     </p>
                                                 </Link>
                                             </NavigationMenuLink>
-                                        </li>
-                                        <li>
+                                        </li>                                        <li>
                                             <NavigationMenuLink asChild>
                                                 <Link
-                                                    to="/dashboard"
+                                                    to="/schedules"
                                                     className={cn(
                                                         "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                                                        location.pathname === '/dashboard' && "bg-accent text-accent-foreground"
+                                                        location.pathname === '/schedules' && "bg-accent text-accent-foreground"
                                                     )}
                                                 >
-                                                    <div className="text-sm font-medium leading-none">Dashboard</div>
+                                                    <div className="text-sm font-medium leading-none">Schedules</div>
                                                     <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                                        Your personal dashboard and overview
+                                                        Manage your work schedules and time tracking
                                                     </p>
                                                 </Link>
                                             </NavigationMenuLink>
@@ -137,9 +137,8 @@ function NavBar() {
                         <option value="/schedules">Schedules</option>
                         <option value="/test">Test</option>
                     </select>
-                </div>
-                  {/* Auth Buttons */}
-                <div className="flex flex-1 items-center justify-end space-x-2 pr-4">
+                </div>                  {/* Auth Buttons */}
+                <div className="flex flex-1 items-center justify-end space-x-2">
                     {isLoading ? (
                         // Loading state
                         <div className="flex items-center space-x-2">
