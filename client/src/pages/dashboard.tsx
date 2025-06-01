@@ -59,8 +59,8 @@ function Dashboard() {
             addAlert({
                 type: 'success',
                 title: 'Success Alert',
-                message: 'This persistent alert will stay until you close it!',
-                duration: 0 // Persistent
+                message: 'This is a success message',
+                duration: 5000 // Persistent
             })
         }, 2000)
     }
@@ -73,7 +73,7 @@ function Dashboard() {
                         <h1 className="text-3xl font-bold">Dashboard</h1>
                         {user && (
                             <p className="text-muted-foreground mt-2">
-                                Welcome back, {user.name || user.email}!
+                                Welcome back, {user.firstname || user.email}!
                             </p>
                         )}
                     </div>
@@ -93,7 +93,7 @@ function Dashboard() {
                         <h1 className="text-3xl font-bold">Dashboard</h1>
                         {user && (
                             <p className="text-muted-foreground mt-2">
-                                Welcome back, {user.firstname || user.name || user.email}!
+                                Welcome back, {user.firstname || user.email}!
                             </p>
                         )}
                     </div>

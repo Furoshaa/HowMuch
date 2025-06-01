@@ -2,6 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import Register from './pages/users/Register'
 import Login from './pages/users/Login'
 import Dashboard from './pages/dashboard'
+import Schedules from './pages/schedules'
 import NavBar from './components/NavBar'
 import ProtectedRoute from './components/ProtectedRoute'
 import Test from './pages/test'
@@ -23,6 +24,11 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/schedules" element={
+              <ProtectedRoute>
+                <Schedules />
               </ProtectedRoute>
             } />
             <Route path="/test" element={<Test />} />

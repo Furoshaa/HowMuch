@@ -43,16 +43,12 @@ export const getScheduleByUserId = async (req: Request, res: Response) => {
     const { user_id } = req.params;
 
     try {
-        const [schedule] = await db.execute<work_schedule[]>(
+        const [schedules] = await db.execute<work_schedule[]>(
             "SELECT * FROM work_schedule WHERE user_id = ?",
             [user_id]
         );
 
-        if (!schedule[0]) {
-            res.status(404).json({ success: false, message: "schedule not found" });
-        } else {
-            res.status(200).json({ success: true, data: schedule[0] });
-        }
+        res.status(200).json({ success: true, data: schedules });
     } catch (error) {
         if (error instanceof Error) {
             console.log("Error in fetching schedule by user_id:", error.message);

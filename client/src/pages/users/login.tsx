@@ -51,7 +51,7 @@ function Login() {
                     type: 'success',
                     title: 'Welcome back!',
                     message: `Successfully logged in as ${data.data.firstname} ${data.data.lastname}`,
-                    duration: 0 // Persistent alert that stays until user closes it
+                    duration: 5000 // Persistent alert that stays until user closes it
                 })
                 
                 // Navigate to dashboard
