@@ -78,7 +78,7 @@ function NavBar() {
                                             <NavigationMenuLink asChild>
                                                 <Link
                                                     className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                                                    to="/"
+                                                    to="/dashboard"
                                                 >
                                                     <div className="mb-2 mt-4 text-lg font-medium">
                                                         HowMuch
@@ -101,38 +101,6 @@ function NavBar() {
                                                     <div className="text-sm font-medium leading-none">Dashboard</div>
                                                     <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                                                         Your personal dashboard and overview
-                                                    </p>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </li>
-                                        <li>
-                                            <NavigationMenuLink asChild>
-                                                <Link
-                                                    to="/users"
-                                                    className={cn(
-                                                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                                                        location.pathname === '/users' && "bg-accent text-accent-foreground"
-                                                    )}
-                                                >
-                                                    <div className="text-sm font-medium leading-none">Users</div>
-                                                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                                        Manage user accounts and profiles
-                                                    </p>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </li>
-                                        <li>
-                                            <NavigationMenuLink asChild>
-                                                <Link
-                                                    to="/schedules"
-                                                    className={cn(
-                                                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                                                        location.pathname === '/schedules' && "bg-accent text-accent-foreground"
-                                                    )}
-                                                >
-                                                    <div className="text-sm font-medium leading-none">Schedules</div>
-                                                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                                        View and manage work schedules
                                                     </p>
                                                 </Link>
                                             </NavigationMenuLink>
