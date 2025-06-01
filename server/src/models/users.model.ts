@@ -7,6 +7,8 @@ export interface User extends RowDataPacket {
     lastname: string;
     email: string;
     password: string;
+	created_at: Date;
+	updated_at: Date;
 }
 
 
@@ -19,6 +21,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 	`lastname` VARCHAR(255) NOT NULL,
 	`email` VARCHAR(255) NOT NULL,
 	`password` VARCHAR(255) NOT NULL,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`)
 );
 */

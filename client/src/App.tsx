@@ -2,27 +2,38 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import UsersList from './pages/users/usersList'
 import SchedulesList from './pages/schedules/schedulesList'
 import Register from './pages/users/Register'
-import Login from './pages/users/login'
+import Login from './pages/users/Login'
+import Dashboard from './pages/dashboard'
 import NavBar from './components/NavBar'
+import ProtectedRoute from './components/ProtectedRoute'
 import Test from './pages/test'
 import { Button } from '@/components/ui/button'
 import OffsetBorderButton from '@/components/ui/OffsetBorderButton'
+import { AlertProvider } from '@/components/ui/alert-context'
+import { AlertContainer } from '@/components/ui/alert-container'
 
 function App() {
   return (
-    <div className="min-h-screen bg-background font-sans antialiased">
-      <NavBar />
-      <main className="container mx-auto px-4 py-8">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/users" element={<UsersList />} />
-          <Route path="/schedules" element={<SchedulesList />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/test" element={<Test />} />
-        </Routes>
-      </main>
-    </div>
+    <AlertProvider>
+      <div className="min-h-screen bg-background font-sans antialiased">
+        <NavBar />
+        <AlertContainer />
+        <main className="container mx-auto px-4 py-8">          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/users" element={<UsersList />} />
+            <Route path="/schedules" element={<SchedulesList />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/test" element={<Test />} />
+          </Routes>
+        </main>
+      </div>
+    </AlertProvider>
   )
 }
 
@@ -53,7 +64,7 @@ function Home() {
           borderRadius={16}
           onClick={() => navigate('/login')}
         >
-          Custom Button
+          Login
         </OffsetBorderButton>
       </div>
 

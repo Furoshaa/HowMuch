@@ -95,9 +95,52 @@ export const createUser = async (req: Request, res: Response) => {
             
             res.status(statusCode).json({ 
                 success: false, 
-                message: error.message
-            });
+                message: error.message            });
         }
+    }
+}
+
+// Login user
+export const loginUser = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        res.status(400).json({ success: false, message: "Please provide email and password" });
+        return;
+    }
+
+    try {
+        const [users] = await db.execute<User[]>(
+            "SELECT * FROM users WHERE email = ?",
+            [email]
+        );
+
+        if (!users[0]) {
+            res.status(401).json({ success: false, message: "This email isn't in our database" });
+            return;
+        }
+
+        const user = users[0];
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            res.status(401).json({ success: false, message: "Invalid password" });
+            return;
+        }
+
+        // Don't return the password in the response
+        const { password: userPassword, ...userWithoutPassword } = user;
+        res.status(200).json({ 
+            success: true, 
+            message: "Login successful",
+            data: userWithoutPassword 
+        });
+    } catch (error: any) {
+        console.log("Error in login:", error.message);
+        res.status(500).json({ 
+            success: false, 
+            message: "Server error" 
+        });
     }
 }
 

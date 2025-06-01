@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAlert } from '@/components/ui/alert-context'
 
 function Register() {
+    const navigate = useNavigate()
+    const { addAlert } = useAlert()
     const [formData, setFormData] = useState({
         username: '',
         firstname: '',
@@ -15,6 +18,7 @@ function Register() {
         password: '',
         confirmPassword: ''
     })
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -24,10 +28,79 @@ function Register() {
         }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // TODO: Handle form submission
-        console.log('Form submitted:', formData)
+
+        // Validate passwords match
+        if (formData.password !== formData.confirmPassword) {
+            addAlert({
+                type: 'error',
+                title: 'Validation Error',
+                message: 'Passwords do not match',
+                duration: 5000
+            })
+            return
+        }
+
+        // Validate password strength (basic validation)
+        if (formData.password.length < 6) {
+            addAlert({
+                type: 'error',
+                title: 'Password Too Short',
+                message: 'Password must be at least 6 characters long',
+                duration: 5000
+            })
+            return
+        }
+
+        setIsLoading(true)
+
+        try {
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: formData.username,
+                    firstname: formData.firstname,
+                    lastname: formData.lastname,
+                    email: formData.email,
+                    password: formData.password
+                })
+            })
+
+            const data = await response.json()
+
+            if (data.success) {
+                // Registration successful
+                addAlert({
+                    type: 'success',
+                    title: 'Registration Successful!',
+                    message: 'Your account has been created. You can now log in.',
+                    duration: 7000
+                })
+                // Navigate to login page
+                navigate('/login')
+            } else {
+                addAlert({
+                    type: 'error',
+                    title: 'Registration Failed',
+                    message: data.message || 'Unable to create account. Please try again.',
+                    duration: 6000
+                })
+            }
+        } catch (error) {
+            console.error('Registration error:', error)
+            addAlert({
+                type: 'error',
+                title: 'Network Error',
+                message: 'Unable to connect to server. Please check your connection and try again.',
+                duration: 6000
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -38,8 +111,7 @@ function Register() {
                     <CardDescription className="text-center">
                         Enter your details below to create your account
                     </CardDescription>
-                </CardHeader>
-                <CardContent>
+                </CardHeader>                <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="username">Username</Label>
@@ -51,6 +123,7 @@ function Register() {
                                 value={formData.username}
                                 onChange={handleInputChange}
                                 required
+                                disabled={isLoading}
                             />
                         </div>
                         
@@ -65,6 +138,7 @@ function Register() {
                                     value={formData.firstname}
                                     onChange={handleInputChange}
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -77,6 +151,7 @@ function Register() {
                                     value={formData.lastname}
                                     onChange={handleInputChange}
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                         </div>
@@ -91,16 +166,20 @@ function Register() {
                                 value={formData.email}
                                 onChange={handleInputChange}
                                 required
+                                disabled={isLoading}
                             />
-                        </div>                        <div className="space-y-2">
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
                             <PasswordInput
                                 id="password"
                                 name="password"
-                                placeholder="Enter your password"
+                                placeholder="Enter your password (min. 6 characters)"
                                 value={formData.password}
                                 onChange={handleInputChange}
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -113,11 +192,12 @@ function Register() {
                                 value={formData.confirmPassword}
                                 onChange={handleInputChange}
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
-                        <Button type="submit" className="w-full" size="lg">
-                            Create Account
+                        <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                            {isLoading ? 'Creating Account...' : 'Create Account'}
                         </Button>
                     </form>
                 </CardContent>

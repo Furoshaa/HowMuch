@@ -160,16 +160,15 @@ const SchedulesList: React.FC = () => {
                         <th>Hourly Rate</th>
                         <th>Daily Earnings</th>
                         <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>                    {schedules.map((schedule) => {
+                    </tr>                </thead>
+                <tbody>
+                    {schedules.map((schedule) => {
                         const workHours = calculateWorkHours(schedule);
                         // Make sure hourly_rate is treated as a number
                         const hourlyRate = parseFloat(String(schedule.hourly_rate));
                         const dailyEarning = workHours * hourlyRate;                        // Get the user from the map using user_id
                         const user = usersMap[schedule.user_id];
                         const username = user ? user.username : `User ${schedule.user_id}`;
-                        const userTooltip = user ? `${user.firstname} ${user.lastname} (${user.email})` : '';
                         
                         return (
                             <tr key={schedule.id}>
