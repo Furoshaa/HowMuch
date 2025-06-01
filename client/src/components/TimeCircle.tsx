@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
-import './TimeCircle.css'; // Import the CSS file
 
-const TimeCircle = () => {
+const SleepTimer = () => {
   const [startAngle, setStartAngle] = useState(315); // 21:00 (9 PM)
   const [endAngle, setEndAngle] = useState(135); // 07:00 (7 AM)
   const [isDragging, setIsDragging] = useState(null);
@@ -199,13 +198,16 @@ const TimeCircle = () => {
           y1={y1}
           x2={x2}
           y2={y2}
-          className={isMainHour ? "hour-marker-main" : "hour-marker-minor"}
+          stroke="#666"
+          strokeWidth={isMainHour ? 2 : 1}
         />
         {isMainHour && (
           <text
             x={centerX + (markerRadius + 15) * Math.cos(radian)}
             y={centerY + (markerRadius + 15) * Math.sin(radian)}
-            className="hour-number-outer"
+            textAnchor="middle"
+            dominantBaseline="central"
+            className="text-sm font-medium fill-gray-300"
           >
             {i === 0 ? '12' : i}
           </text>
@@ -229,7 +231,9 @@ const TimeCircle = () => {
         key={i}
         x={x}
         y={y}
-        className="hour-number-inner"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="text-lg font-medium fill-white"
       >
         {hour}
       </text>
@@ -240,12 +244,12 @@ const TimeCircle = () => {
   const endPoint = polarToCartesian(endAngle);
 
   return (
-    <div className="sleep-timer-container">
-      <div className="sleep-timer-header">
-        <h1 className="sleep-timer-title">Sleep Schedule</h1>
-        <div className="time-inputs-container">
-          <div className="time-input-group">
-            <div className="time-input-label">Bedtime</div>
+    <div className="flex flex-col items-center justify-center p-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-center mb-2">Sleep Schedule</h1>
+        <div className="flex justify-between items-center w-80">
+          <div className="text-center">
+            <div className="text-sm text-gray-400 mb-1">Bedtime</div>
             <input
               type="text"
               value={startTimeInput || angleToTime(startAngle)}
@@ -254,11 +258,11 @@ const TimeCircle = () => {
               onKeyPress={(e) => handleTimeInputKeyPress('start', e, e.target.value)}
               placeholder="HH:MM"
               pattern="[0-2][0-9]:[0-5][0-9]"
-              className="time-input-field"
+              className="text-lg font-medium border border-gray-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-blue-500 w-20"
             />
           </div>
-          <div className="time-input-group">
-            <div className="time-input-label">Wake Up</div>
+          <div className="text-center">
+            <div className="text-sm text-gray-400 mb-1">Wake Up</div>
             <input
               type="text"
               value={endTimeInput || angleToTime(endAngle)}
@@ -267,18 +271,18 @@ const TimeCircle = () => {
               onKeyPress={(e) => handleTimeInputKeyPress('end', e, e.target.value)}
               placeholder="HH:MM"
               pattern="[0-2][0-9]:[0-5][0-9]"
-              className="time-input-field"
+              className="text-lg font-medium border border-gray-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-blue-500 w-20"
             />
           </div>
         </div>
       </div>
 
-      <div className="clock-container">
+      <div className="relative">
         <svg
           ref={svgRef}
           width="320"
           height="320"
-          className="clock-svg"
+          className="select-none"
           style={{ touchAction: 'none' }}
         >
           {/* Background circle */}
@@ -286,7 +290,9 @@ const TimeCircle = () => {
             cx={centerX}
             cy={centerY}
             r={radius}
-            className="background-circle"
+            fill="none"
+            stroke="#333"
+            strokeWidth="2"
           />
           
           {/* Hour markers */}
@@ -298,7 +304,11 @@ const TimeCircle = () => {
           {/* Sleep duration arc */}
           <path
             d={createArcPath(startAngle, endAngle)}
-            className={`sleep-arc ${isDragging === 'arc' ? 'dragging' : ''}`}
+            fill="none"
+            stroke="#007AFF"
+            strokeWidth="8"
+            strokeLinecap="round"
+            className="cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown('arc')}
             onTouchStart={handleTouchStart('arc')}
           />
@@ -308,7 +318,10 @@ const TimeCircle = () => {
             cx={startPoint.x}
             cy={startPoint.y}
             r={handleRadius}
-            className={`sleep-handle ${isDragging === 'start' ? 'dragging' : ''}`}
+            fill="#007AFF"
+            stroke="#fff"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown('start')}
             onTouchStart={handleTouchStart('start')}
           />
@@ -318,7 +331,10 @@ const TimeCircle = () => {
             cx={endPoint.x}
             cy={endPoint.y}
             r={handleRadius}
-            className={`sleep-handle ${isDragging === 'end' ? 'dragging' : ''}`}
+            fill="#007AFF"
+            stroke="#fff"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown('end')}
             onTouchStart={handleTouchStart('end')}
           />
@@ -328,14 +344,14 @@ const TimeCircle = () => {
             cx={centerX}
             cy={centerY}
             r="6"
-            className="center-dot"
+            fill="#333"
           />
         </svg>
       </div>
       
-      <div className="duration-section">
-        <div className="duration-label">Sleep Duration</div>
-        <div className="duration-value">
+      <div className="mt-8 text-center">
+        <div className="text-sm text-gray-400 mb-1">Sleep Duration</div>
+        <div className="text-lg font-medium">
           {(() => {
             let duration = endAngle - startAngle;
             if (duration < 0) duration += 360;
@@ -350,4 +366,4 @@ const TimeCircle = () => {
   );
 };
 
-export default TimeCircle;
+export default SleepTimer;

@@ -20,7 +20,7 @@ function NavBar() {
                 {/* Brand */}
                 <div className="mr-6 flex items-center space-x-2">
                     <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        <span className="text-xl font-bold bg-clip-text pl-5">
                             HowMuch
                         </span>
                     </Link>
@@ -129,7 +129,7 @@ function NavBar() {
                 </div>
                 
                 {/* Auth Buttons */}
-                <div className="flex flex-1 items-center justify-end space-x-2">
+                <div className="flex flex-1 items-center justify-end space-x-2 pr-4">
                     <Button 
                         variant="ghost" 
                         size="sm"

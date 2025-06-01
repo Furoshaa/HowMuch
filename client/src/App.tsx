@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import UsersList from './pages/users/usersList'
 import SchedulesList from './pages/schedules/schedulesList'
 import Register from './pages/users/Register'
@@ -6,6 +6,7 @@ import Login from './pages/users/login'
 import NavBar from './components/NavBar'
 import Test from './pages/test'
 import { Button } from '@/components/ui/button'
+import OffsetBorderButton from '@/components/ui/OffsetBorderButton'
 
 function App() {
   return (
@@ -27,10 +28,12 @@ function App() {
 
 // Simple Home component
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col items-center justify-center text-center py-16">
       <h1 className="text-4xl font-bold tracking-tight mb-4">
-        Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">HowMuch</span>
+        Welcome to <span>HowMuch</span>
       </h1>
       <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
         Manage your work schedules and users efficiently with our comprehensive time tracking platform
@@ -43,6 +46,17 @@ function Home() {
           <Link to="/schedules">View Schedules</Link>
         </Button>
       </div>
+
+      <div className="mt-16">
+        <OffsetBorderButton 
+          offset={4} 
+          borderRadius={16}
+          onClick={() => navigate('/login')}
+        >
+          Custom Button
+        </OffsetBorderButton>
+      </div>
+
     </div>
   )
 }

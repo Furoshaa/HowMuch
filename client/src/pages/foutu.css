@@ -1,9 +1,3 @@
-body {
-  margin-top: 100px;
-  padding: 0;
-  height: 100vh;
-}
-
 .time-display {
   position: relative;
   display: inline-block;
