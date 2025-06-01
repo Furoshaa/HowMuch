@@ -118,3 +118,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide browser's built-in password reveal buttons globally */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
