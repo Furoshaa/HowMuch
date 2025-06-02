@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { useAlert } from '@/components/ui/alert-context'
 import { useAuth } from '@/hooks/useAuth'
-import { Clock, Coffee, User } from 'lucide-react'
+import { Clock, Coffee, User, Plus } from 'lucide-react'
+import TimeCircle from '@/components/TimeCircle'
 
 interface WorkSchedule {
     id: number;
@@ -28,12 +29,14 @@ function Schedules() {
 
     const [newSchedule, setNewSchedule] = useState({
         day_of_week: '',
-        work_start: '',
-        break_start: '',
-        break_end: '',
-        work_end: '',
+        work_start: '09:00',
+        break_start: '12:00',
+        break_end: '13:00',
+        work_end: '17:00',
         hourly_rate: ''
     })
+
+    const [dialogOpen, setDialogOpen] = useState(false)
 
     const days = [
         { value: 'monday', label: 'Monday' },
@@ -77,12 +80,11 @@ function Schedules() {
                 duration: 4000
             })
         } finally {
-            setLoading(false)
-        }
+            setLoading(false)        }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault()
         setSubmitting(true)
 
         if (!user?.id) {
@@ -117,16 +119,16 @@ function Schedules() {
                     title: 'Success',
                     message: 'Schedule created successfully',
                     duration: 4000
-                })
-                
+                })                
                 setNewSchedule({
                     day_of_week: '',
-                    work_start: '',
-                    break_start: '',
-                    break_end: '',
-                    work_end: '',
+                    work_start: '09:00',
+                    break_start: '12:00',
+                    break_end: '13:00',
+                    work_end: '17:00',
                     hourly_rate: ''
                 })
+                setDialogOpen(false)
                 fetchSchedules() // Refresh the list
             } else {
                 addAlert({
@@ -162,8 +164,7 @@ function Schedules() {
             return user.firstname && user.lastname 
                 ? `${user.firstname} ${user.lastname}` 
                 : user.name || user.email
-        }
-        return 'Unknown User'
+        }        return 'Unknown User'
     }
 
     const calculateWorkHours = (start: string, end: string, breakStart: string, breakEnd: string) => {
@@ -176,6 +177,16 @@ function Schedules() {
         const breakTime = (breakEndTime.getTime() - breakStartTime.getTime()) / (1000 * 60 * 60)
         
         return (totalWork - breakTime).toFixed(1)
+    }
+
+    const handleTimeChange = (data: { workTime: { start: string; end: string }; breakTime: { start: string; end: string } }) => {
+        setNewSchedule(prev => ({
+            ...prev,
+            work_start: data.workTime.start,
+            work_end: data.workTime.end,
+            break_start: data.breakTime.start,
+            break_end: data.breakTime.end
+        }))
     }
 
     if (loading) {
@@ -210,22 +221,34 @@ function Schedules() {
                 <p className="text-muted-foreground">
                     Manage and view your work schedules
                 </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {/* Create New Schedule Form Card */}
-                <Card className="border-dashed border-2 border-primary/20 bg-primary/5">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <User className="h-5 w-5" />
-                            Create New Schedule
-                        </CardTitle>
-                        <CardDescription>
-                            Create a new work schedule
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+            </div>            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {/* Create New Schedule Button/Dialog */}
+                <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                        <Card className="border-dashed border-2 border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors">
+                            <CardHeader className="text-center">
+                                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                                    <Plus className="h-6 w-6 text-primary" />
+                                </div>
+                                <CardTitle className="text-lg">Create New Schedule</CardTitle>
+                                <CardDescription>
+                                    Set up a new work schedule with custom times
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-md">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                Create New Schedule
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Set up your work hours, break times, and daily rate for a specific day of the week.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="day">Day of Week</Label>
                                 <Select 
@@ -245,50 +268,13 @@ function Schedules() {
                                 </Select>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                    <Label htmlFor="work_start">Work Start</Label>
-                                    <Input
-                                        id="work_start"
-                                        type="time"
-                                        value={newSchedule.work_start}
-                                        onChange={(e) => setNewSchedule({...newSchedule, work_start: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="work_end">Work End</Label>
-                                    <Input
-                                        id="work_end"
-                                        type="time"
-                                        value={newSchedule.work_end}
-                                        onChange={(e) => setNewSchedule({...newSchedule, work_end: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                    <Label htmlFor="break_start">Break Start</Label>
-                                    <Input
-                                        id="break_start"
-                                        type="time"
-                                        value={newSchedule.break_start}
-                                        onChange={(e) => setNewSchedule({...newSchedule, break_start: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="break_end">Break End</Label>
-                                    <Input
-                                        id="break_end"
-                                        type="time"
-                                        value={newSchedule.break_end}
-                                        onChange={(e) => setNewSchedule({...newSchedule, break_end: e.target.value})}
-                                        required
-                                    />
-                                </div>
+                            {/* Time Circle Component */}
+                            <div className="flex justify-center">
+                                <TimeCircle
+                                    onTimeChange={handleTimeChange}
+                                    initialWorkTime={{ start: newSchedule.work_start, end: newSchedule.work_end }}
+                                    initialBreakTime={{ start: newSchedule.break_start, end: newSchedule.break_end }}
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -303,13 +289,19 @@ function Schedules() {
                                     required
                                 />
                             </div>
-
-                            <Button type="submit" className="w-full" disabled={submitting}>
-                                {submitting ? 'Creating...' : 'Create Schedule'}
-                            </Button>
                         </form>
-                    </CardContent>
-                </Card>
+
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Creating...' : 'Create Schedule'}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
                 {/* Existing Schedules */}
                 {schedules.map((schedule) => (

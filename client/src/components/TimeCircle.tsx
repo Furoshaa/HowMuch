@@ -1,363 +1,387 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { Clock, Play, Coffee } from 'lucide-react';
 
-const SleepTimer = () => {
-  const [startAngle, setStartAngle] = useState(315); // 21:00 (9 PM)
-  const [endAngle, setEndAngle] = useState(135); // 07:00 (7 AM)
-  const [isDragging, setIsDragging] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [startTimeInput, setStartTimeInput] = useState('');
-  const [endTimeInput, setEndTimeInput] = useState('');
-  const svgRef = useRef<SVGSVGElement>(null);
+interface TimeRange {
+  start: string;
+  end: string;
+}
 
-  const radius = 140;
-  const centerX = 160;
-  const centerY = 160;
-  const handleRadius = 8;
-  // Convert angle to time (0° = 12:00)
+interface WorkTimeData {
+  workTime: TimeRange;
+  breakTime: TimeRange;
+}
+
+interface WorkTimeSelectorProps {
+  onTimeChange?: (data: WorkTimeData) => void;
+  initialWorkTime?: TimeRange;
+  initialBreakTime?: TimeRange;
+}
+
+const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
+  onTimeChange,
+  initialWorkTime = { start: '09:00', end: '17:00' },
+  initialBreakTime = { start: '12:00', end: '13:00' }
+}) => {
+  const [workTime, setWorkTime] = useState<TimeRange>(initialWorkTime);
+  const [breakTime, setBreakTime] = useState<TimeRange>(initialBreakTime);
+  const [dragState, setDragState] = useState<{
+    isDragging: boolean;
+    type: 'start' | 'end' | 'arc' | null;
+    circle: 'work' | 'break' | null;
+    initialAngle?: number;
+    initialStart?: string;
+    initialEnd?: string;
+  }>({ isDragging: false, type: null, circle: null });
+
+  const circleRef = useRef<SVGSVGElement>(null);
+
+  const timeToAngle = (time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    return (totalMinutes / (24 * 60)) * 360 - 90; // -90 to start from top
+  };
+
   const angleToTime = (angle: number): string => {
-    const normalizedAngle = ((angle % 360) + 360) % 360;
+    const normalizedAngle = ((angle + 90) % 360 + 360) % 360;
     const totalMinutes = (normalizedAngle / 360) * 24 * 60;
-    const hours = Math.floor(totalMinutes / 60) % 24;
-    const minutes = Math.round(totalMinutes % 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.round((totalMinutes % 60) / 15) * 15; // Round to nearest 15 minutes
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  // Convert time string to angle
-  const timeToAngle = (timeStr: string): number => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes;
-    return (totalMinutes / (24 * 60)) * 360;
-  };
-
-  // Convert polar coordinates to cartesian
-  const polarToCartesian = (angle: number) => {
-    const radian = (angle - 90) * (Math.PI / 180);
+  const getPointOnCircle = (angle: number, radius: number) => {
+    const rad = (angle * Math.PI) / 180;
     return {
-      x: centerX + radius * Math.cos(radian),
-      y: centerY + radius * Math.sin(radian)
+      x: 90 + radius * Math.cos(rad),
+      y: 90 + radius * Math.sin(rad)
     };
   };
 
-  // Convert mouse position to angle
-  const mouseToAngle = (clientX: number, clientY: number): number => {
-    if (!svgRef.current) return 0;
+  const getAngleFromPoint = (clientX: number, clientY: number) => {
+    if (!circleRef.current) return 0;
     
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = clientX - rect.left - centerX;
-    const y = clientY - rect.top - centerY;
+    const rect = circleRef.current.getBoundingClientRect();
+    const centerX = rect.left + 90;
+    const centerY = rect.top + 90;
     
-    let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
-    return ((angle % 360) + 360) % 360;
-  };
-  // Handle time input changes
-  const handleTimeInputChange = (type: 'start' | 'end', value: string) => {
-    if (type === 'start') {
-      setStartTimeInput(value);
-    } else {
-      setEndTimeInput(value);
-    }
+    const deltaX = clientX - centerX;
+    const deltaY = clientY - centerY;
+    
+    return Math.atan2(deltaY, deltaX) * (180 / Math.PI);
   };
 
-  const handleTimeInputBlur = (type: 'start' | 'end', value: string) => {
-    if (value.match(/^\d{2}:\d{2}$/)) {
-      const [hours, minutes] = value.split(':').map(Number);
-      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-        const angle = timeToAngle(value);
-        if (type === 'start') {
-          setStartAngle(angle);
-          setStartTimeInput('');
-        } else {
-          setEndAngle(angle);
-          setEndTimeInput('');
-        }
-      }
-    }
-    // Reset input if invalid
-    if (type === 'start') {
-      setStartTimeInput('');
-    } else {
-      setEndTimeInput('');
-    }
-  };
-
-  const handleTimeInputKeyPress = (type: 'start' | 'end', e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
-    if (e.key === 'Enter') {
-      handleTimeInputBlur(type, value);
-    }
-  };
-
-  // Create arc path
-  const createArcPath = (start: number, end: number): string => {
-    const startPoint = polarToCartesian(start);
-    const endPoint = polarToCartesian(end);
-    
-    // Calculate if we need the large arc flag
-    let angleDiff = end - start;
-    if (angleDiff < 0) angleDiff += 360;
-    const largeArc = angleDiff > 180 ? 1 : 0;
-    
-    return `M ${startPoint.x} ${startPoint.y} A ${radius} ${radius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y}`;
-  };
-  // Handle mouse events
-  const handleMouseDown = (type: string) => (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent, type: 'start' | 'end' | 'arc', circle: 'work' | 'break') => {
     e.preventDefault();
-    if (type === 'arc') {
-      // For arc dragging, store the initial angle difference
-      const currentAngle = mouseToAngle(e.clientX, e.clientY);
-      setDragOffset(currentAngle);
-    }
-    setIsDragging(type);
+    setDragState({ isDragging: true, type, circle });
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
-    
-    const angle = mouseToAngle(e.clientX, e.clientY);
-    
-    if (isDragging === 'start') {
-      setStartAngle(angle);
-    } else if (isDragging === 'end') {
-      setEndAngle(angle);
-    } else if (isDragging === 'arc') {
-      // Move both angles by the same amount
-      const angleDiff = angle - dragOffset;
-      setStartAngle(prev => prev + angleDiff);
-      setEndAngle(prev => prev + angleDiff);
-      setDragOffset(angle);
+    if (!dragState.isDragging || !dragState.type || !dragState.circle) return;
+
+    const angle = getAngleFromPoint(e.clientX, e.clientY);
+
+    if (dragState.type === 'arc') {
+      // Move entire arc - calculate offset from initial position
+      if (dragState.initialAngle !== undefined && dragState.initialStart && dragState.initialEnd) {
+        const angleDiff = angle - dragState.initialAngle;
+        const startAngle = timeToAngle(dragState.initialStart) + angleDiff;
+        const endAngle = timeToAngle(dragState.initialEnd) + angleDiff;
+        
+        const newStart = angleToTime(startAngle);
+        const newEnd = angleToTime(endAngle);
+
+        if (dragState.circle === 'work') {
+          const newWorkTime = { start: newStart, end: newEnd };
+          setWorkTime(newWorkTime);
+          onTimeChange?.({ workTime: newWorkTime, breakTime });
+        } else {
+          const newBreakTime = { start: newStart, end: newEnd };
+          setBreakTime(newBreakTime);
+          onTimeChange?.({ workTime, breakTime: newBreakTime });
+        }
+      }
+    } else {
+      // Move individual handle
+      const newTime = angleToTime(angle);
+
+      if (dragState.circle === 'work') {
+        const newWorkTime = { ...workTime, [dragState.type]: newTime };
+        setWorkTime(newWorkTime);
+        onTimeChange?.({ workTime: newWorkTime, breakTime });
+      } else {
+        const newBreakTime = { ...breakTime, [dragState.type]: newTime };
+        setBreakTime(newBreakTime);
+        onTimeChange?.({ workTime, breakTime: newBreakTime });
+      }
     }
-  }, [isDragging, dragOffset]);
+  }, [dragState, workTime, breakTime, onTimeChange]);
 
   const handleMouseUp = useCallback(() => {
-    setIsDragging(null);
+    setDragState({ isDragging: false, type: null, circle: null });
   }, []);
 
-  // Add global event listeners
   React.useEffect(() => {
-    if (isDragging) {
+    if (dragState.isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove);
-      document.addEventListener('touchend', handleMouseUp);
-      
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
-        document.removeEventListener('touchmove', handleTouchMove);
-        document.removeEventListener('touchend', handleMouseUp);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-  // Handle touch events
-  const handleTouchStart = (type: string) => (e: React.TouchEvent) => {
-    e.preventDefault();
-    if (type === 'arc' && e.touches[0]) {
-      const currentAngle = mouseToAngle(e.touches[0].clientX, e.touches[0].clientY);
-      setDragOffset(currentAngle);
+  }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
+
+  const handleTimeInputChange = (
+    circle: 'work' | 'break',
+    type: 'start' | 'end',
+    value: string
+  ) => {
+    if (circle === 'work') {
+      const newWorkTime = { ...workTime, [type]: value };
+      setWorkTime(newWorkTime);
+      onTimeChange?.({ workTime: newWorkTime, breakTime });
+    } else {
+      const newBreakTime = { ...breakTime, [type]: value };
+      setBreakTime(newBreakTime);
+      onTimeChange?.({ workTime, breakTime: newBreakTime });
     }
-    setIsDragging(type);
   };
 
-  const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!isDragging || !e.touches[0]) return;
+  const createArc = (startAngle: number, endAngle: number, radius: number) => {
+    const start = getPointOnCircle(startAngle, radius);
+    const end = getPointOnCircle(endAngle, radius);
     
-    const angle = mouseToAngle(e.touches[0].clientX, e.touches[0].clientY);
+    let sweepAngle = endAngle - startAngle;
+    if (sweepAngle < 0) sweepAngle += 360;
     
-    if (isDragging === 'start') {
-      setStartAngle(angle);
-    } else if (isDragging === 'end') {
-      setEndAngle(angle);
-    } else if (isDragging === 'arc') {
-      const angleDiff = angle - dragOffset;
-      setStartAngle(prev => prev + angleDiff);
-      setEndAngle(prev => prev + angleDiff);
-      setDragOffset(angle);
-    }
-  }, [isDragging, dragOffset]);
+    const largeArcFlag = sweepAngle > 180 ? 1 : 0;
+    
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
+  };
 
-  // Generate hour markers
-  const hourMarkers = Array.from({ length: 24 }, (_, i) => {
-    const angle = (i * 15) - 90; // 360/24 = 15 degrees per hour
-    const radian = angle * (Math.PI / 180);
-    const isMainHour = i % 6 === 0;
-    const markerRadius = isMainHour ? radius + 15 : radius + 10;
-    const innerRadius = radius - 5;
-    
-    const x1 = centerX + innerRadius * Math.cos(radian);
-    const y1 = centerY + innerRadius * Math.sin(radian);
-    const x2 = centerX + markerRadius * Math.cos(radian);
-    const y2 = centerY + markerRadius * Math.sin(radian);
-    
-    return (
-      <g key={i}>
-        <line
-          x1={x1}
-          y1={y1}
-          x2={x2}
-          y2={y2}
-          stroke="#666"
-          strokeWidth={isMainHour ? 2 : 1}
-        />
-        {isMainHour && (
-          <text
-            x={centerX + (markerRadius + 15) * Math.cos(radian)}
-            y={centerY + (markerRadius + 15) * Math.sin(radian)}
-            textAnchor="middle"
-            dominantBaseline="central"
-            className="text-sm font-medium fill-gray-300"
-          >
-            {i === 0 ? '12' : i}
-          </text>
-        )}
-      </g>
-    );
-  });
-
-  // Generate inner hour numbers
-  const innerHourNumbers = Array.from({ length: 12 }, (_, i) => {
-    const hour = i === 0 ? 12 : i;
-    const angle = (i * 30) - 90; // 360/12 = 30 degrees per hour
-    const radian = angle * (Math.PI / 180);
-    const numberRadius = radius - 35;
-    
-    const x = centerX + numberRadius * Math.cos(radian);
-    const y = centerY + numberRadius * Math.sin(radian);
-    
-    return (
-      <text
-        key={i}
-        x={x}
-        y={y}
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="text-lg font-medium fill-white"
-      >
-        {hour}
-      </text>
-    );
-  });
-
-  const startPoint = polarToCartesian(startAngle);
-  const endPoint = polarToCartesian(endAngle);
+  const workStartAngle = timeToAngle(workTime.start);
+  const workEndAngle = timeToAngle(workTime.end);
+  const breakStartAngle = timeToAngle(breakTime.start);
+  const breakEndAngle = timeToAngle(breakTime.end);
 
   return (
-    <div className="flex flex-col items-center justify-center p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-center mb-2">Sleep Schedule</h1>
-        <div className="flex justify-between items-center w-80">
-          <div className="text-center">
-            <div className="text-sm text-gray-400 mb-1">Bedtime</div>
+    <div className="flex flex-col items-center space-y-4 p-4 bg-gray-50 rounded-lg max-w-xs mx-auto">
+
+      {/* Combined Circle */}
+      <div className="relative">
+        <svg
+          ref={circleRef}
+          width="180"
+          height="180"
+          className="cursor-pointer"
+        >
+          {/* Background circle */}
+          <circle
+            cx="90"
+            cy="90"
+            r="70"
+            fill="none"
+            stroke="#f3f4f6"
+            strokeWidth="3"
+          />
+          
+          {/* Hour markers */}
+          {Array.from({ length: 12 }, (_, i) => {
+            const angle = (i * 30) - 90; // Every 2 hours
+            const innerRadius = 62;
+            const outerRadius = 70;
+            const inner = getPointOnCircle(angle, innerRadius);
+            const outer = getPointOnCircle(angle, outerRadius);
+            
+            return (
+              <g key={i}>
+                <line
+                  x1={inner.x}
+                  y1={inner.y}
+                  x2={outer.x}
+                  y2={outer.y}
+                  stroke="#d1d5db"
+                  strokeWidth="1"
+                />
+                <text
+                  x={getPointOnCircle(angle, 52).x}
+                  y={getPointOnCircle(angle, 52).y}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  className="text-xs font-medium fill-gray-500"
+                >
+                  {i * 2}
+                </text>
+              </g>
+            );
+          })}
+          
+          {/* Work time arc (bottom layer) */}
+          <path
+            d={createArc(workStartAngle, workEndAngle, 70)}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="4"
+            strokeLinecap="round"
+            opacity="0.7"
+            className="cursor-move"
+            onMouseDown={(e) => {
+              const angle = getAngleFromPoint(e.clientX, e.clientY);
+              setDragState({ 
+                isDragging: true, 
+                type: 'arc', 
+                circle: 'work',
+                initialAngle: angle,
+                initialStart: workTime.start,
+                initialEnd: workTime.end
+              });
+            }}
+          />
+          
+          {/* Break time arc (on top) */}
+          <path
+            d={createArc(breakStartAngle, breakEndAngle, 70)}
+            fill="none"
+            stroke="#f97316"
+            strokeWidth="6"
+            strokeLinecap="round"
+            className="cursor-move"
+            onMouseDown={(e) => {
+              const angle = getAngleFromPoint(e.clientX, e.clientY);
+              setDragState({ 
+                isDragging: true, 
+                type: 'arc', 
+                circle: 'break',
+                initialAngle: angle,
+                initialStart: breakTime.start,
+                initialEnd: breakTime.end
+              });
+            }}
+          />
+          
+          {/* Work time handles */}
+          <circle
+            cx={getPointOnCircle(workStartAngle, 70).x}
+            cy={getPointOnCircle(workStartAngle, 70).y}
+            r="5"
+            fill="#3b82f6"
+            stroke="white"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing"
+            onMouseDown={(e) => handleMouseDown(e, 'start', 'work')}
+          />
+          <circle
+            cx={getPointOnCircle(workEndAngle, 70).x}
+            cy={getPointOnCircle(workEndAngle, 70).y}
+            r="5"
+            fill="#1d4ed8"
+            stroke="white"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing"
+            onMouseDown={(e) => handleMouseDown(e, 'end', 'work')}
+          />
+          
+          {/* Break time handles (on top) */}
+          <circle
+            cx={getPointOnCircle(breakStartAngle, 70).x}
+            cy={getPointOnCircle(breakStartAngle, 70).y}
+            r="6"
+            fill="#f97316"
+            stroke="white"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing"
+            onMouseDown={(e) => handleMouseDown(e, 'start', 'break')}
+          />
+          <circle
+            cx={getPointOnCircle(breakEndAngle, 70).x}
+            cy={getPointOnCircle(breakEndAngle, 70).y}
+            r="6"
+            fill="#ea580c"
+            stroke="white"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing"
+            onMouseDown={(e) => handleMouseDown(e, 'end', 'break')}
+          />
+        </svg>
+        
+        {/* Legend */}
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-3 text-xs">
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
+            <span className="text-gray-600">Work</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            <span className="text-gray-600">Break</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Time Inputs */}
+      <div className="grid grid-cols-2 gap-3 w-full text-xs">
+        {/* Work Time */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-center space-x-1 text-blue-600">
+            <Play size={12} />
+            <span className="font-medium">Work</span>
+          </div>
+          <div className="space-y-1">
             <input
-              type="text"
-              value={startTimeInput || angleToTime(startAngle)}
-              onChange={(e) => handleTimeInputChange('start', e.target.value)}              onBlur={(e) => handleTimeInputBlur('start', (e.target as HTMLInputElement).value)}
-              onKeyPress={(e) => handleTimeInputKeyPress('start', e, (e.target as HTMLInputElement).value)}
-              placeholder="HH:MM"
-              pattern="[0-2][0-9]:[0-5][0-9]"
-              className="text-lg font-medium border border-gray-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-blue-500 w-20"
+              type="time"
+              value={workTime.start}
+              onChange={(e) => handleTimeInputChange('work', 'start', e.target.value)}
+              className="w-full border rounded px-2 py-1 text-xs text-center bg-white"
+              placeholder="Start"
+            />
+            <input
+              type="time"
+              value={workTime.end}
+              onChange={(e) => handleTimeInputChange('work', 'end', e.target.value)}
+              className="w-full border rounded px-2 py-1 text-xs text-center bg-white"
+              placeholder="End"
             />
           </div>
-          <div className="text-center">
-            <div className="text-sm text-gray-400 mb-1">Wake Up</div>
+        </div>
+
+        {/* Break Time */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-center space-x-1 text-orange-600">
+            <Coffee size={12} />
+            <span className="font-medium">Break</span>
+          </div>
+          <div className="space-y-1">
             <input
-              type="text"
-              value={endTimeInput || angleToTime(endAngle)}
-              onChange={(e) => handleTimeInputChange('end', e.target.value)}              onBlur={(e) => handleTimeInputBlur('end', (e.target as HTMLInputElement).value)}
-              onKeyPress={(e) => handleTimeInputKeyPress('end', e, (e.target as HTMLInputElement).value)}
-              placeholder="HH:MM"
-              pattern="[0-2][0-9]:[0-5][0-9]"
-              className="text-lg font-medium border border-gray-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-blue-500 w-20"
+              type="time"
+              value={breakTime.start}
+              onChange={(e) => handleTimeInputChange('break', 'start', e.target.value)}
+              className="w-full border rounded px-2 py-1 text-xs text-center bg-white"
+              placeholder="Start"
+            />
+            <input
+              type="time"
+              value={breakTime.end}
+              onChange={(e) => handleTimeInputChange('break', 'end', e.target.value)}
+              className="w-full border rounded px-2 py-1 text-xs text-center bg-white"
             />
           </div>
         </div>
       </div>
 
-      <div className="relative">
-        <svg
-          ref={svgRef}
-          width="320"
-          height="320"
-          className="select-none"
-          style={{ touchAction: 'none' }}
-        >
-          {/* Background circle */}
-          <circle
-            cx={centerX}
-            cy={centerY}
-            r={radius}
-            fill="none"
-            stroke="#333"
-            strokeWidth="2"
-          />
-          
-          {/* Hour markers */}
-          {hourMarkers}
-          
-          {/* Inner hour numbers */}
-          {innerHourNumbers}
-          
-          {/* Sleep duration arc */}
-          <path
-            d={createArcPath(startAngle, endAngle)}
-            fill="none"
-            stroke="#007AFF"
-            strokeWidth="8"
-            strokeLinecap="round"
-            className="cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown('arc')}
-            onTouchStart={handleTouchStart('arc')}
-          />
-          
-          {/* Start handle (bedtime) */}
-          <circle
-            cx={startPoint.x}
-            cy={startPoint.y}
-            r={handleRadius}
-            fill="#007AFF"
-            stroke="#fff"
-            strokeWidth="2"
-            className="cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown('start')}
-            onTouchStart={handleTouchStart('start')}
-          />
-          
-          {/* End handle (wake up) */}
-          <circle
-            cx={endPoint.x}
-            cy={endPoint.y}
-            r={handleRadius}
-            fill="#007AFF"
-            stroke="#fff"
-            strokeWidth="2"
-            className="cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown('end')}
-            onTouchStart={handleTouchStart('end')}
-          />
-          
-          {/* Center decoration */}
-          <circle
-            cx={centerX}
-            cy={centerY}
-            r="6"
-            fill="#333"
-          />
-        </svg>
-      </div>
-      
-      <div className="mt-8 text-center">
-        <div className="text-sm text-gray-400 mb-1">Sleep Duration</div>
-        <div className="text-lg font-medium">
-          {(() => {
-            let duration = endAngle - startAngle;
-            if (duration < 0) duration += 360;
-            const totalMinutes = Math.round((duration / 360) * 24 * 60);
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            return `${hours}h ${minutes}m`;
-          })()}
+      {/* Summary */}
+      <div className="bg-white p-2 rounded border w-full text-xs">
+        <div className="text-center space-y-1">
+          <div className="flex justify-between">
+            <span className="text-blue-600 font-medium">Work:</span>
+            <span className="text-gray-700">{workTime.start} - {workTime.end}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-orange-600 font-medium">Break:</span>
+            <span className="text-gray-700">{breakTime.start} - {breakTime.end}</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default SleepTimer;
+export default WorkTimeSelector;
