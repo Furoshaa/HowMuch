@@ -75,12 +75,15 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
     
     return Math.atan2(deltaY, deltaX) * (180 / Math.PI);
   };
-
   const handleMouseDown = (e: React.MouseEvent, type: 'start' | 'end' | 'arc', circle: 'work' | 'break') => {
     e.preventDefault();
     setDragState({ isDragging: true, type, circle });
   };
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+
+  const handleTouchStart = (e: React.TouchEvent, type: 'start' | 'end' | 'arc', circle: 'work' | 'break') => {
+    e.preventDefault();
+    setDragState({ isDragging: true, type, circle });
+  };  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!dragState.isDragging || !dragState.type || !dragState.circle) return;
 
     // Get the config to access center
@@ -124,20 +127,71 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
     }
   }, [dragState, workTime, breakTime, onTimeChange, size]);
 
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!dragState.isDragging || !dragState.type || !dragState.circle) return;
+
+    // Get the config to access center
+    const config = sizeConfig[size];
+    const center = config.svg / 2;
+    const touch = e.touches[0];
+    const angle = getAngleFromPoint(touch.clientX, touch.clientY, center);
+
+    if (dragState.type === 'arc') {
+      // Move entire arc - calculate offset from initial position
+      if (dragState.initialAngle !== undefined && dragState.initialStart && dragState.initialEnd) {
+        const angleDiff = angle - dragState.initialAngle;
+        const startAngle = timeToAngle(dragState.initialStart) + angleDiff;
+        const endAngle = timeToAngle(dragState.initialEnd) + angleDiff;
+        
+        const newStart = angleToTime(startAngle);
+        const newEnd = angleToTime(endAngle);
+
+        if (dragState.circle === 'work') {
+          const newWorkTime = { start: newStart, end: newEnd };
+          setWorkTime(newWorkTime);
+          onTimeChange?.({ workTime: newWorkTime, breakTime });
+        } else {
+          const newBreakTime = { start: newStart, end: newEnd };
+          setBreakTime(newBreakTime);
+          onTimeChange?.({ workTime, breakTime: newBreakTime });
+        }
+      }
+    } else {
+      // Move individual handle
+      const newTime = angleToTime(angle);
+
+      if (dragState.circle === 'work') {
+        const newWorkTime = { ...workTime, [dragState.type]: newTime };
+        setWorkTime(newWorkTime);
+        onTimeChange?.({ workTime: newWorkTime, breakTime });
+      } else {
+        const newBreakTime = { ...breakTime, [dragState.type]: newTime };
+        setBreakTime(newBreakTime);
+        onTimeChange?.({ workTime, breakTime: newBreakTime });
+      }
+    }
+  }, [dragState, workTime, breakTime, onTimeChange, size]);
   const handleMouseUp = useCallback(() => {
     setDragState({ isDragging: false, type: null, circle: null });
   }, []);
 
+  const handleTouchEnd = useCallback(() => {
+    setDragState({ isDragging: false, type: null, circle: null });
+  }, []);
   React.useEffect(() => {
     if (dragState.isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
+  }, [dragState.isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   const handleTimeInputChange = (
     circle: 'work' | 'break',
@@ -169,12 +223,11 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
   const workEndAngle = timeToAngle(workTime.end);
   const breakStartAngle = timeToAngle(breakTime.start);
   const breakEndAngle = timeToAngle(breakTime.end);
-
   // Size configurations
   const sizeConfig = {
-    sm: { svg: 120, radius: 45, fontSize: 'text-xs', markers: 6 },
-    md: { svg: 180, radius: 70, fontSize: 'text-sm', markers: 12 },
-    lg: { svg: 240, radius: 95, fontSize: 'text-base', markers: 12 }
+    sm: { svg: 120, radius: 45, fontSize: 'text-xs', markers: 6, handleSize: 6 },
+    md: { svg: 180, radius: 70, fontSize: 'text-sm', markers: 12, handleSize: 7 },
+    lg: { svg: 240, radius: 95, fontSize: 'text-base', markers: 12, handleSize: 8 }
   };
 
   const config = sizeConfig[size];
@@ -183,12 +236,12 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
   return (
     <div className={`flex flex-col items-center space-y-3 ${className}`}>
       {/* Time Circle */}
-      <div className="relative">
-        <svg
+      <div className="relative">        <svg
           ref={circleRef}
           width={config.svg}
           height={config.svg}
-          className="cursor-pointer"
+          className="cursor-pointer touch-none"
+          style={{ touchAction: 'none' }}
         >
           {/* Background circle */}
           <circle
@@ -244,8 +297,7 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
               </g>
             );
           })}
-          
-          {/* Work time arc */}
+            {/* Work time arc */}
           <path
             d={createArc(workStartAngle, workEndAngle, config.radius, center)}
             fill="none"
@@ -265,9 +317,20 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
                 initialEnd: workTime.end
               });
             }}
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              const angle = getAngleFromPoint(touch.clientX, touch.clientY, center);
+              setDragState({ 
+                isDragging: true, 
+                type: 'arc', 
+                circle: 'work',
+                initialAngle: angle,
+                initialStart: workTime.start,
+                initialEnd: workTime.end
+              });
+            }}
           />
-          
-          {/* Break time arc */}
+            {/* Break time arc */}
           <path
             d={createArc(breakStartAngle, breakEndAngle, config.radius, center)}
             fill="none"
@@ -286,50 +349,62 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
                 initialEnd: breakTime.end
               });
             }}
-          />
-          
-          {/* Work time handles */}
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              const angle = getAngleFromPoint(touch.clientX, touch.clientY, center);
+              setDragState({ 
+                isDragging: true, 
+                type: 'arc', 
+                circle: 'break',
+                initialAngle: angle,
+                initialStart: breakTime.start,
+                initialEnd: breakTime.end
+              });
+            }}
+          />          {/* Work time handles */}
           <circle
             cx={center + config.radius * Math.cos((workStartAngle * Math.PI) / 180)}
             cy={center + config.radius * Math.sin((workStartAngle * Math.PI) / 180)}
-            r="5"
+            r={config.handleSize}
             fill="#3b82f6"
             stroke="white"
             strokeWidth="2"
             className="cursor-grab active:cursor-grabbing"
             onMouseDown={(e) => handleMouseDown(e, 'start', 'work')}
+            onTouchStart={(e) => handleTouchStart(e, 'start', 'work')}
           />
           <circle
             cx={center + config.radius * Math.cos((workEndAngle * Math.PI) / 180)}
             cy={center + config.radius * Math.sin((workEndAngle * Math.PI) / 180)}
-            r="5"
+            r={config.handleSize}
             fill="#1d4ed8"
             stroke="white"
             strokeWidth="2"
             className="cursor-grab active:cursor-grabbing"
             onMouseDown={(e) => handleMouseDown(e, 'end', 'work')}
-          />
-          
-          {/* Break time handles */}
+            onTouchStart={(e) => handleTouchStart(e, 'end', 'work')}
+          />          {/* Break time handles */}
           <circle
             cx={center + config.radius * Math.cos((breakStartAngle * Math.PI) / 180)}
             cy={center + config.radius * Math.sin((breakStartAngle * Math.PI) / 180)}
-            r="6"
+            r={config.handleSize + 1}
             fill="#f97316"
             stroke="white"
             strokeWidth="2"
             className="cursor-grab active:cursor-grabbing"
             onMouseDown={(e) => handleMouseDown(e, 'start', 'break')}
+            onTouchStart={(e) => handleTouchStart(e, 'start', 'break')}
           />
           <circle
             cx={center + config.radius * Math.cos((breakEndAngle * Math.PI) / 180)}
             cy={center + config.radius * Math.sin((breakEndAngle * Math.PI) / 180)}
-            r="6"
+            r={config.handleSize + 1}
             fill="#ea580c"
             stroke="white"
             strokeWidth="2"
             className="cursor-grab active:cursor-grabbing"
             onMouseDown={(e) => handleMouseDown(e, 'end', 'break')}
+            onTouchStart={(e) => handleTouchStart(e, 'end', 'break')}
           />
         </svg>
         
