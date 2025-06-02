@@ -36,9 +36,9 @@ function NavBar() {
             duration: 4000
         });
         navigate('/');
-    };
-      return (
-        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    };      
+    return (
+        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 animate-slide-down animate-delay-200">
             <div className="flex h-14 w-full items-center px-6">
                 {/* Brand */}
                 <div className="mr-6 flex items-center space-x-2">

@@ -97,21 +97,22 @@ function Register() {
                 title: 'Network Error',
                 message: 'Unable to connect to server. Please check your connection and try again.',
                 duration: 6000
-            })
+            })        
         } finally {
             setIsLoading(false)
         }
     }
 
     return (
-        <div className="flex items-center justify-center min-h-[80vh]">
-            <Card className="w-full max-w-md">
-                <CardHeader className="space-y-1">
+        <div className="flex items-center justify-center min-h-[80vh] animate-fade-in-up animate-delay-100">
+            <Card className="w-full max-w-md animate-fade-in-scale animate-delay-200">
+                <CardHeader className="space-y-1 animate-fade-in-up animate-delay-300">
                     <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
                     <CardDescription className="text-center">
                         Enter your details below to create your account
                     </CardDescription>
-                </CardHeader>                <CardContent>
+                </CardHeader>                
+                <CardContent className="animate-fade-in-up animate-delay-400">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="username">Username</Label>
@@ -124,6 +125,7 @@ function Register() {
                                 onChange={handleInputChange}
                                 required
                                 disabled={isLoading}
+                                className="hover-lift"
                             />
                         </div>
                         
@@ -139,6 +141,7 @@ function Register() {
                                     onChange={handleInputChange}
                                     required
                                     disabled={isLoading}
+                                    className="hover-lift"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -152,6 +155,7 @@ function Register() {
                                     onChange={handleInputChange}
                                     required
                                     disabled={isLoading}
+                                    className="hover-lift"
                                 />
                             </div>
                         </div>
@@ -167,6 +171,7 @@ function Register() {
                                 onChange={handleInputChange}
                                 required
                                 disabled={isLoading}
+                                className="hover-lift"
                             />
                         </div>
 
@@ -180,6 +185,7 @@ function Register() {
                                 onChange={handleInputChange}
                                 required
                                 disabled={isLoading}
+                                className="hover-lift"
                             />
                         </div>
 
@@ -193,15 +199,16 @@ function Register() {
                                 onChange={handleInputChange}
                                 required
                                 disabled={isLoading}
+                                className="hover-lift"
                             />
                         </div>
 
-                        <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                        <Button type="submit" className="w-full hover-lift" size="lg" disabled={isLoading}>
                             {isLoading ? 'Creating Account...' : 'Create Account'}
                         </Button>
                     </form>
                 </CardContent>
-                <CardFooter className="flex justify-center">
+                <CardFooter className="flex justify-center animate-fade-in-up animate-delay-500">
                     <p className="text-sm text-muted-foreground">
                         Already have an account?{' '}
                         <Link to="/login" className="text-primary hover:underline font-medium">

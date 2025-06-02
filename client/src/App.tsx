@@ -17,7 +17,7 @@ function App() {
       <div className="min-h-screen bg-background font-sans antialiased">
         <NavBar />
         <AlertContainer />
-        <main className="container mx-auto px-4 py-8">          
+        <main className="container mx-auto px-4 py-8 animate-fade-in-up animate-delay-200">          
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
@@ -50,17 +50,17 @@ function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center text-center py-16">
-      <h1 className="text-4xl font-bold tracking-tight mb-4">
+      <h1 className="text-4xl font-bold tracking-tight mb-4 animate-fade-in-up animate-delay-100">
         Welcome to <span>HowMuch</span>
       </h1>
-      <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
+      <p className="text-xl text-muted-foreground mb-8 max-w-2xl animate-fade-in-up animate-delay-200">
         Manage your work schedules and users efficiently with our comprehensive time tracking platform
       </p>
-      <div className="flex gap-4">
-        <Button asChild size="lg">
+      <div className="flex gap-4 animate-fade-in-scale animate-delay-300">
+        <Button asChild size="lg" className="hover-lift">
           <Link to="/users">View Users</Link>
         </Button>
-        <Button asChild variant="outline" size="lg">
+        <Button asChild variant="outline" size="lg" className="hover-lift">
           <Link to="/schedules">View Schedules</Link>
         </Button>
       </div>
