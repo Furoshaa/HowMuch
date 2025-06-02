@@ -1,6 +1,6 @@
 import { RowDataPacket } from 'mysql2';
 
-export interface work_sessions extends RowDataPacket {
+export interface work_session extends RowDataPacket {
     id: number;
     user_id: number;
     work_date: Date; // Use Date for date values
