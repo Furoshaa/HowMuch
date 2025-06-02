@@ -3,19 +3,18 @@ import React, { useState, useRef, useCallback } from 'react';
 const SleepTimer = () => {
   const [startAngle, setStartAngle] = useState(315); // 21:00 (9 PM)
   const [endAngle, setEndAngle] = useState(135); // 07:00 (7 AM)
-  const [isDragging, setIsDragging] = useState(null);
+  const [isDragging, setIsDragging] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
   const [startTimeInput, setStartTimeInput] = useState('');
   const [endTimeInput, setEndTimeInput] = useState('');
-  const svgRef = useRef(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const radius = 140;
   const centerX = 160;
   const centerY = 160;
   const handleRadius = 8;
-
   // Convert angle to time (0° = 12:00)
-  const angleToTime = (angle) => {
+  const angleToTime = (angle: number): string => {
     const normalizedAngle = ((angle % 360) + 360) % 360;
     const totalMinutes = (normalizedAngle / 360) * 24 * 60;
     const hours = Math.floor(totalMinutes / 60) % 24;
@@ -24,14 +23,14 @@ const SleepTimer = () => {
   };
 
   // Convert time string to angle
-  const timeToAngle = (timeStr) => {
+  const timeToAngle = (timeStr: string): number => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes;
     return (totalMinutes / (24 * 60)) * 360;
   };
 
   // Convert polar coordinates to cartesian
-  const polarToCartesian = (angle) => {
+  const polarToCartesian = (angle: number) => {
     const radian = (angle - 90) * (Math.PI / 180);
     return {
       x: centerX + radius * Math.cos(radian),
@@ -40,7 +39,7 @@ const SleepTimer = () => {
   };
 
   // Convert mouse position to angle
-  const mouseToAngle = (clientX, clientY) => {
+  const mouseToAngle = (clientX: number, clientY: number): number => {
     if (!svgRef.current) return 0;
     
     const rect = svgRef.current.getBoundingClientRect();
@@ -50,9 +49,8 @@ const SleepTimer = () => {
     let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
     return ((angle % 360) + 360) % 360;
   };
-
   // Handle time input changes
-  const handleTimeInputChange = (type, value) => {
+  const handleTimeInputChange = (type: 'start' | 'end', value: string) => {
     if (type === 'start') {
       setStartTimeInput(value);
     } else {
@@ -60,7 +58,7 @@ const SleepTimer = () => {
     }
   };
 
-  const handleTimeInputBlur = (type, value) => {
+  const handleTimeInputBlur = (type: 'start' | 'end', value: string) => {
     if (value.match(/^\d{2}:\d{2}$/)) {
       const [hours, minutes] = value.split(':').map(Number);
       if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
@@ -82,14 +80,14 @@ const SleepTimer = () => {
     }
   };
 
-  const handleTimeInputKeyPress = (type, e, value) => {
+  const handleTimeInputKeyPress = (type: 'start' | 'end', e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
     if (e.key === 'Enter') {
       handleTimeInputBlur(type, value);
     }
   };
 
   // Create arc path
-  const createArcPath = (start, end) => {
+  const createArcPath = (start: number, end: number): string => {
     const startPoint = polarToCartesian(start);
     const endPoint = polarToCartesian(end);
     
@@ -100,9 +98,8 @@ const SleepTimer = () => {
     
     return `M ${startPoint.x} ${startPoint.y} A ${radius} ${radius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y}`;
   };
-
   // Handle mouse events
-  const handleMouseDown = (type) => (e) => {
+  const handleMouseDown = (type: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     if (type === 'arc') {
       // For arc dragging, store the initial angle difference
@@ -112,7 +109,7 @@ const SleepTimer = () => {
     setIsDragging(type);
   };
 
-  const handleMouseMove = useCallback((e) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     
     const angle = mouseToAngle(e.clientX, e.clientY);
@@ -150,9 +147,8 @@ const SleepTimer = () => {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
-
   // Handle touch events
-  const handleTouchStart = (type) => (e) => {
+  const handleTouchStart = (type: string) => (e: React.TouchEvent) => {
     e.preventDefault();
     if (type === 'arc' && e.touches[0]) {
       const currentAngle = mouseToAngle(e.touches[0].clientX, e.touches[0].clientY);
@@ -161,7 +157,7 @@ const SleepTimer = () => {
     setIsDragging(type);
   };
 
-  const handleTouchMove = useCallback((e) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging || !e.touches[0]) return;
     
     const angle = mouseToAngle(e.touches[0].clientX, e.touches[0].clientY);
@@ -253,9 +249,8 @@ const SleepTimer = () => {
             <input
               type="text"
               value={startTimeInput || angleToTime(startAngle)}
-              onChange={(e) => handleTimeInputChange('start', e.target.value)}
-              onBlur={(e) => handleTimeInputBlur('start', e.target.value)}
-              onKeyPress={(e) => handleTimeInputKeyPress('start', e, e.target.value)}
+              onChange={(e) => handleTimeInputChange('start', e.target.value)}              onBlur={(e) => handleTimeInputBlur('start', (e.target as HTMLInputElement).value)}
+              onKeyPress={(e) => handleTimeInputKeyPress('start', e, (e.target as HTMLInputElement).value)}
               placeholder="HH:MM"
               pattern="[0-2][0-9]:[0-5][0-9]"
               className="text-lg font-medium border border-gray-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-blue-500 w-20"
@@ -266,9 +261,8 @@ const SleepTimer = () => {
             <input
               type="text"
               value={endTimeInput || angleToTime(endAngle)}
-              onChange={(e) => handleTimeInputChange('end', e.target.value)}
-              onBlur={(e) => handleTimeInputBlur('end', e.target.value)}
-              onKeyPress={(e) => handleTimeInputKeyPress('end', e, e.target.value)}
+              onChange={(e) => handleTimeInputChange('end', e.target.value)}              onBlur={(e) => handleTimeInputBlur('end', (e.target as HTMLInputElement).value)}
+              onKeyPress={(e) => handleTimeInputKeyPress('end', e, (e.target as HTMLInputElement).value)}
               placeholder="HH:MM"
               pattern="[0-2][0-9]:[0-5][0-9]"
               className="text-lg font-medium border border-gray-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-blue-500 w-20"
