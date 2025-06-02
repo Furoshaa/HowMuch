@@ -28,7 +28,7 @@ app.use("/api/sessions", WorkSessionRoutes);
 
 app.listen(PORT, () => { 
   testConnection();
-  console.log("Server running at PORT: ", PORT); 
+  console.log("Server running at PORT:", PORT); 
 }).on("error", (error) => {
   // gracefully handle error
   throw new Error(error.message);
