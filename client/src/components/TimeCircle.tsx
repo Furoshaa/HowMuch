@@ -232,11 +232,10 @@ const TimeCircle: React.FC<TimeCircleProps> = ({
 
   const config = sizeConfig[size];
   const center = config.svg / 2;
-
   return (
-    <div className={`flex flex-col items-center space-y-3 ${className}`}>
+    <div className={`${showInputs ? 'flex flex-col items-center space-y-4' : 'flex justify-center'} ${className}`}>
       {/* Time Circle */}
-      <div className="relative">        
+      <div className="relative flex justify-center">        
         <svg
           ref={circleRef}
           width={config.svg}
