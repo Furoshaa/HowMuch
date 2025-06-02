@@ -1,8 +1,9 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Link } from 'react-router-dom'
 import Register from './pages/users/Register'
-import Login from './pages/users/Login'
+import Login from './pages/users/login'
 import Dashboard from './pages/dashboard'
 import Schedules from './pages/schedules'
+import Calendar from './pages/Calendar'
 import NavBar from './components/NavBar'
 import ProtectedRoute from './components/ProtectedRoute'
 import Test from './pages/test'
@@ -29,6 +30,11 @@ function App() {
             <Route path="/schedules" element={
               <ProtectedRoute>
                 <Schedules />
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute>
+                <Calendar />
               </ProtectedRoute>
             } />
             <Route path="/test" element={<Test />} />

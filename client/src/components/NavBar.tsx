@@ -89,7 +89,8 @@ function NavBar() {
                                                     </p>
                                                 </Link>
                                             </NavigationMenuLink>
-                                        </li>                                        <li>
+                                        </li>                                        
+                                        <li>
                                             <NavigationMenuLink asChild>
                                                 <Link
                                                     to="/schedules"
@@ -101,6 +102,22 @@ function NavBar() {
                                                     <div className="text-sm font-medium leading-none">Schedules</div>
                                                     <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                                                         Manage your work schedules and time tracking
+                                                    </p>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                        </li>
+                                        <li>
+                                            <NavigationMenuLink asChild>
+                                                <Link
+                                                    to="/calendar"
+                                                    className={cn(
+                                                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                                        location.pathname === '/calendar' && "bg-accent text-accent-foreground"
+                                                    )}
+                                                >
+                                                    <div className="text-sm font-medium leading-none">Calendar</div>
+                                                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                                        See and manage your work calendar.
                                                     </p>
                                                 </Link>
                                             </NavigationMenuLink>
