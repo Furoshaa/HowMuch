@@ -1,17 +1,17 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Play, Coffee } from 'lucide-react';
 
-interface TimeRange {
+export interface TimeRange {
   start: string;
   end: string;
 }
 
-interface WorkTimeData {
+export interface WorkTimeData {
   workTime: TimeRange;
   breakTime: TimeRange;
 }
 
-interface WorkTimeSelectorProps {
+interface TimeCircleProps {
   onTimeChange?: (data: WorkTimeData) => void;
   initialWorkTime?: TimeRange;
   initialBreakTime?: TimeRange;
@@ -21,7 +21,7 @@ interface WorkTimeSelectorProps {
   className?: string;
 }
 
-const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
+const TimeCircle: React.FC<TimeCircleProps> = ({
   onTimeChange,
   initialWorkTime = { start: '09:00', end: '17:00' },
   initialBreakTime = { start: '12:00', end: '13:00' },
@@ -236,7 +236,8 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
   return (
     <div className={`flex flex-col items-center space-y-3 ${className}`}>
       {/* Time Circle */}
-      <div className="relative">        <svg
+      <div className="relative">        
+        <svg
           ref={circleRef}
           width={config.svg}
           height={config.svg}
@@ -509,4 +510,4 @@ const WorkTimeSelector: React.FC<WorkTimeSelectorProps> = ({
   );
 };
 
-export default WorkTimeSelector;
+export default TimeCircle;

@@ -236,60 +236,118 @@ function Schedules() {
                                 </CardDescription>
                             </CardHeader>
                         </Card>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="max-w-md">
+                    </AlertDialogTrigger>                    <AlertDialogContent className="max-w-md max-h-[85vh] overflow-hidden">
                         <AlertDialogHeader>
                             <AlertDialogTitle className="flex items-center gap-2">
                                 <User className="h-5 w-5" />
                                 Create New Schedule
                             </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Set up your work hours, break times, and daily rate for a specific day of the week.
-                            </AlertDialogDescription>
                         </AlertDialogHeader>
                         
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="day">Day of Week</Label>
-                                <Select 
-                                    value={newSchedule.day_of_week} 
-                                    onValueChange={(value) => setNewSchedule({...newSchedule, day_of_week: value})}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a day" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {days.map((day) => (
-                                            <SelectItem key={day.value} value={day.value}>
-                                                {day.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                        <div className="max-h-[65vh] overflow-y-auto px-1 -mx-1">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Day selector - inline on mobile */}
+                                <div className="flex items-center gap-3 sm:flex-col sm:items-start sm:space-y-2">
+                                    <Label htmlFor="day" className="text-sm font-medium whitespace-nowrap">Day of the week:</Label>
+                                    <Select 
+                                        value={newSchedule.day_of_week} 
+                                        onValueChange={(value) => setNewSchedule({...newSchedule, day_of_week: value})}
+                                    >
+                                        <SelectTrigger className="flex-1 sm:w-full">
+                                            <SelectValue placeholder="Select a day" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {days.map((day) => (
+                                                <SelectItem key={day.value} value={day.value}>
+                                                    {day.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>                                {/* Time Circle Component - Mobile Optimized */}
+                                <div className="w-full flex justify-center items-center">
+                                    <TimeCircle
+                                        onTimeChange={handleTimeChange}
+                                        initialWorkTime={{ start: newSchedule.work_start, end: newSchedule.work_end }}
+                                        initialBreakTime={{ start: newSchedule.break_start, end: newSchedule.break_end }}
+                                        size="md"
+                                        showSummary={false}
+                                        showInputs={false}
+                                        className="sm:hidden"
+                                    />
+                                    <TimeCircle
+                                        onTimeChange={handleTimeChange}
+                                        initialWorkTime={{ start: newSchedule.work_start, end: newSchedule.work_end }}
+                                        initialBreakTime={{ start: newSchedule.break_start, end: newSchedule.break_end }}
+                                        size="md"
+                                        showSummary={false}
+                                        showInputs={true}
+                                        className="hidden sm:block"
+                                    />
+                                </div>
 
-                            {/* Time Circle Component */}
-                            <div className="flex justify-center">
-                                <TimeCircle
-                                    onTimeChange={handleTimeChange}
-                                    initialWorkTime={{ start: newSchedule.work_start, end: newSchedule.work_end }}
-                                    initialBreakTime={{ start: newSchedule.break_start, end: newSchedule.break_end }}
-                                />
-                            </div>
+                                {/* Mobile Time Inputs */}
+                                <div className="grid grid-cols-2 gap-3 sm:hidden">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs flex items-center gap-1">
+                                            <Clock className="h-3 w-3 text-blue-600" />
+                                            Work Hours
+                                        </Label>
+                                        <div className="space-y-1">
+                                            <Input
+                                                type="time"
+                                                value={newSchedule.work_start}
+                                                onChange={(e) => setNewSchedule({...newSchedule, work_start: e.target.value})}
+                                                className="text-xs"
+                                                placeholder="Start"
+                                            />
+                                            <Input
+                                                type="time"
+                                                value={newSchedule.work_end}
+                                                onChange={(e) => setNewSchedule({...newSchedule, work_end: e.target.value})}
+                                                className="text-xs"
+                                                placeholder="End"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs flex items-center gap-1">
+                                            <Coffee className="h-3 w-3 text-orange-600" />
+                                            Break Time
+                                        </Label>
+                                        <div className="space-y-1">
+                                            <Input
+                                                type="time"
+                                                value={newSchedule.break_start}
+                                                onChange={(e) => setNewSchedule({...newSchedule, break_start: e.target.value})}
+                                                className="text-xs"
+                                                placeholder="Start"
+                                            />
+                                            <Input
+                                                type="time"
+                                                value={newSchedule.break_end}
+                                                onChange={(e) => setNewSchedule({...newSchedule, break_end: e.target.value})}
+                                                className="text-xs"
+                                                placeholder="End"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="hourly_rate">Hourly Rate ($)</Label>
-                                <Input
-                                    id="hourly_rate"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={newSchedule.hourly_rate}
-                                    onChange={(e) => setNewSchedule({...newSchedule, hourly_rate: e.target.value})}
-                                    required
-                                />
-                            </div>
-                        </form>
+                                <div className="space-y-2">
+                                    <Label htmlFor="hourly_rate">Hourly Rate ($)</Label>
+                                    <Input
+                                        id="hourly_rate"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={newSchedule.hourly_rate}
+                                        onChange={(e) => setNewSchedule({...newSchedule, hourly_rate: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                            </form>
+                        </div>
 
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
