@@ -7,6 +7,7 @@ import Calendar from './pages/Calendar'
 import NavBar from './components/NavBar'
 import ProtectedRoute from './components/ProtectedRoute'
 import Test from './pages/test'
+import Foutu from './components/MoneyCounter'
 import { Button } from '@/components/ui/button'
 import { AlertProvider } from '@/components/ui/alert-context'
 import { AlertContainer } from '@/components/ui/alert-container'
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/foutu" element={<Foutu />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

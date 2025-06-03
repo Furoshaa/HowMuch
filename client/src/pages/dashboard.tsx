@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar, Clock, Plus } from 'lucide-react'
 import { useAlert } from '@/components/ui/alert-context'
 import { useAuth } from '@/hooks/useAuth'
+import MoneyCounter from '@/components/MoneyCounter'
 
 function Dashboard() {
     const [hasSchedule, setHasSchedule] = useState(false)
@@ -27,7 +28,8 @@ function Dashboard() {
             })
             navigate('/login')
             return
-        }        // TODO: Check if user has a schedule
+        }        
+        // TODO: Check if user has a schedule
         // For now, simulate loading and no schedule found
         const timer = setTimeout(() => {
             setHasSchedule(false)
@@ -86,6 +88,11 @@ function Dashboard() {
     }
 
     if (!hasSchedule) {
+
+        const startTime = new Date('2025-06-03T13:00:00');
+        const endTime = new Date('2025-06-03T20:00:00');
+        const hourlyWage = 20;
+
         return (
             <div className="container mx-auto px-4 py-8">
                 <div className="max-w-4xl mx-auto">
@@ -96,7 +103,13 @@ function Dashboard() {
                                 Welcome back, {user.firstname || user.email}!
                             </p>
                         )}
-                    </div>
+                    </div>                    
+                    <MoneyCounter
+                        startTime={startTime}
+                        endTime={endTime}
+                        hourlyWage={hourlyWage}
+                        showControls={true}
+                    />
                     
                     {/* No Schedule State */}
                     <div className="flex items-center justify-center min-h-[400px]">
