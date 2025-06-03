@@ -93,23 +93,17 @@ function Dashboard() {
         const endTime = new Date('2025-06-03T20:00:00');
         const hourlyWage = 20;
 
-        return (
-            <div className="container mx-auto px-4 py-8">
+        return (            <div className="container mx-auto px-4 py-8">
                 <div className="max-w-4xl mx-auto">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold">Dashboard</h1>
-                        {user && (
-                            <p className="text-muted-foreground mt-2">
-                                Welcome back, {user.firstname || user.email}!
-                            </p>
-                        )}
-                    </div>                    
-                    <MoneyCounter
-                        startTime={startTime}
-                        endTime={endTime}
-                        hourlyWage={hourlyWage}
-                        showControls={true}
-                    />
+
+                    <div className="mt-50 mb-8">
+                        <MoneyCounter
+                            startTime={startTime}
+                            endTime={endTime}
+                            hourlyWage={hourlyWage}
+                            showControls={false}
+                        />
+                    </div>
                     
                     {/* No Schedule State */}
                     <div className="flex items-center justify-center min-h-[400px]">
